@@ -3,7 +3,7 @@ package com.tananh.dto;
 import java.sql.Date;
 
 public class KhachHang {
-	 private Long idKh;
+	 	private Long idKh;
 	    private String tenKh;
 	    private Date ngayThamGia;
 	    private Integer doanhSo;
