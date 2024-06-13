@@ -2,6 +2,9 @@ package com.tananh.controller;
 
 import com.tananh.dto.HoaDonDto;
 import com.tananh.modal.HoaDon;
+import com.tananh.modal.KhachHang;
+import com.tananh.respository.HoaDonRepository;
+import com.tananh.respository.KhachHangRespository;
 import com.tananh.service.HoaDonService;
 import com.tananh.service.IHoaDonService;
 import jakarta.validation.Valid;
@@ -18,31 +21,28 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("order")
+@RequestMapping("hoadon")
 @RequiredArgsConstructor
 public class HoaDonController {
-    private final IHoaDonService hoaDonService;
-    @PostMapping()
-    public ResponseEntity<?> creatHoaDon(
-            @Valid @RequestBody HoaDonDto hoaDonDto,
-            BindingResult result
-            ){
-        try{
-            if(result.hasErrors()) {
-                List<String> errorMessages = result.getFieldErrors()
-                        .stream()
-                        .map(FieldError::getDefaultMessage)
-                        .toList();
-                return ResponseEntity.badRequest().body(errorMessages);
-            }
+    private final HoaDonService hoaDonService;
+    private final HoaDonRepository hoaDonRepository;
+    private final KhachHangRespository khachHangRespository;
 
-            HoaDon hoaDon = hoaDonService.createHoaDon(hoaDonDto);
-            return ResponseEntity.ok(hoaDon);
+    @PostMapping("/new")
+    public ResponseEntity<?> creatHoaDon (
+            @RequestBody HoaDon hoaDon
+            ) throws Exception{
 
-        }
-        catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+
+            Long lastId = hoaDonRepository.findLastIdHoaDon();
+
+            // Nếu không có hóa đơn nào trong cơ sở dữ liệu, sử dụng ID bắt đầu từ 1
+            Long nextId = (lastId == null) ? 1L : lastId + 1;
+            hoaDon.setIdHoaDon(nextId);
+            hoaDon =hoaDonService.createHoaDon(hoaDon);
+            return ResponseEntity.status(201).body(hoaDon);
+
+
 
     }
 

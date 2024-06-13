@@ -54,7 +54,7 @@ public class AuthController {
         createUser.setEmail(email);
         createUser.setMatKhau(password);
         createUser.setTrangThai("Verified");
-        createUser.setVaiTro("Khach Hang");
+        createUser.setVaiTro("admin");
         createUser.setUsername(username);
         User UserSaved = userResponsitory.save(createUser);
         
