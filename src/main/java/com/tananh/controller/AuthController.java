@@ -1,5 +1,7 @@
 package com.tananh.controller;
 
+import com.tananh.response.ResponseObject;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,19 +47,17 @@ public class AuthController {
         String email = user.getEmail();
         String password = user.getPassword();
         String username = user.getName();
-
         if (userResponsitory.findByEmail(email) != null) {
             throw new UserException("Email đã được sử dụng");
         }
-
-        User createUser = new User();
-        createUser.setEmail(email);
-        createUser.setMatKhau(password);
-        createUser.setTrangThai("Verified");
-        createUser.setVaiTro("admin");
-        createUser.setUsername(username);
+        User createUser = User.builder()
+                .email(email)
+                .matKhau(password)
+                .username(username)
+                .trangThai("verified")
+                .vaiTro("Khach Hang")
+                .build();
         User UserSaved = userResponsitory.save(createUser);
-        
         KhachHang kh = new KhachHang();
         kh.setTenKh(username);
         kh.setIdNd(UserSaved.getId());
@@ -67,12 +67,14 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtProvider.genarateToken(authentication);
+        UserDto userDto = UserDto.builder()
+                .id(UserSaved.getId())
+                .email(email)
+                .matkhau(password)
+                .username(username)
+                .vaitro(UserSaved.getVaiTro())
+                .build();
 
-        UserDto userDto = new UserDto();
-        userDto.setEmail(email);
-        userDto.setMatkhau(password);
-        userDto.setUsername(username);
-        userDto.setVaitro(UserSaved.getVaiTro());
 
         AuthResponse authRes = new AuthResponse(token, true, userDto);
 
@@ -88,16 +90,24 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtProvider.genarateToken(authentication);
+        KhachHang kh = khachHangRespository.findKhachHangByIdNd(UserFinded.getId());
 
-        UserDto userDto = new UserDto();
-        userDto.setEmail(email);
-        userDto.setMatkhau(password);
-        userDto.setUsername(UserFinded.getUsername());
-        userDto.setVaitro(UserFinded.getVaiTro());
+        UserDto userDto = UserDto.builder()
+                .id(UserFinded.getId())
+                .email(email)
+                .matkhau(password)
+                .username(UserFinded.getUsername())
+                .vaitro(UserFinded.getVaiTro())
+                .idkh(kh.getIdKh())
+                .build();
+
         AuthResponse authRes = new AuthResponse(token, true, userDto);
 
         return new ResponseEntity<>(authRes, HttpStatus.OK);
+
+
     }
+
 
     private Authentication authenticate(String email, String password) {
         UserDetails userDetails = customUserDetailServiceImplementation.loadUserByUsername(email);

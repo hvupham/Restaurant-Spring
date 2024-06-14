@@ -14,7 +14,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Builder
 @Table(name = "Nguoidung")
 public class User {
 	@Id
